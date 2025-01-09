@@ -61,10 +61,15 @@ class _MyHomePageState extends State<MyHomePage> {
   // Cycle through the names when you press the button, incrementing the number
   // When you reach the highest index, reset the number back to 0
   // Make sure that it's dynamic so if you add/remove names from the list, it still functions.
-
+  int _counter = 0; 
   final List<String> _myNames = [
     "Dan",
-    "Steve"
+    "Steve",
+    "Alice",
+    "Bob",
+    "Charlie",
+    "Eve",
+    "Mallory"
   ];
 
   String? _myName;
@@ -78,7 +83,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void onPressed(){
     setState(() {
-      _myName = _myNames[1];
+      
+      if (_counter == _myNames.length){
+        _counter= 0; 
+        _myName = _myNames[_counter];
+        
+      }
+      else{
+        _myName = _myNames[_counter];
+        _counter+=1; 
+      }
+      
     });
     
   }

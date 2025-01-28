@@ -5,6 +5,7 @@ import 'package:weatherapp/scripts/forecast.dart' as forecast;
 import 'package:weatherapp/widgets/forecast_summary_widget.dart';
 import 'package:weatherapp/widgets/forecast_widget.dart';
 import 'package:weatherapp/widgets/location_widget.dart';
+import 'package:weatherapp/widgets/forecast_summaries_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -115,6 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               LocationWidget(location: _location),
               // TODO: Create a new widget called ForecastSummaries
+              ForecastSummariesWidget(forecasts: _forecasts),
               // This should return a row of all forecasts
               // The individual forecasts should be ForecastSummaryWidgets
               // There should be some spacing between each forecast as well

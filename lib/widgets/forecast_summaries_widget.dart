@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:weatherapp/scripts/forecast.dart' as forecast;
 import 'package:weatherapp/widgets/forecast_summary_widget.dart';
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> d460ee6d8a4cd1b7212eed30ad6f41883c24cf16
 class ForecastSummariesWidget extends StatelessWidget {
   const ForecastSummariesWidget({
     super.key,
@@ -9,6 +13,7 @@ class ForecastSummariesWidget extends StatelessWidget {
   }) : _forecasts = forecasts;
 
   final List<forecast.Forecast> _forecasts;
+<<<<<<< HEAD
 
 
   List<ForecastSummaryWidget> getForecastWidgets() {
@@ -33,3 +38,20 @@ class ForecastSummariesWidget extends StatelessWidget {
     );
   }
 }
+=======
+  
+  List<ForecastSummaryWidget> getForecastWidgets(){
+    List<ForecastSummaryWidget> widgets = [];
+
+    for (int i = 0; i < _forecasts.length; i++){
+      widgets.add(ForecastSummaryWidget(currentForecast: _forecasts[0]));
+    }
+    return widgets;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: getForecastWidgets()));
+  }
+}
+>>>>>>> d460ee6d8a4cd1b7212eed30ad6f41883c24cf16

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:weatherapp/scripts/location.dart' as location;
 import 'package:weatherapp/scripts/forecast.dart' as forecast;
-import 'package:weatherapp/widgets/forecast_summary_widget.dart';
+import 'package:weatherapp/widgets/forecast_summaries_widget.dart';
 import 'package:weatherapp/widgets/forecast_widget.dart';
 import 'package:weatherapp/widgets/location_widget.dart';
 import 'package:weatherapp/widgets/forecast_summaries_widget.dart';
@@ -14,11 +14,13 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  final String title = 'CS492 Weather App';
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CS492 Weather App',
+      title: title,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: title),
     );
   }
 }
@@ -64,6 +66,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   List<forecast.Forecast> _forecasts = [];
+  forecast.Forecast? _activeForecast;
   location.Location? _location;
 
   @override
@@ -74,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<List<forecast.Forecast>> getForecasts(location.Location currentLocation) async {
-    return forecast.getForecastFromPoints(currentLocation.latitude, currentLocation.longitude);
+    return forecast.getForecastHourlyFromPoints(currentLocation.latitude, currentLocation.longitude);
   }
 
   void setLocation() async {
@@ -86,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _location = currentLocation;
         _forecasts = currentForecasts;
+        _activeForecast = _forecasts[0];
         
       });
     }

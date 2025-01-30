@@ -65,9 +65,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   List<forecast.Forecast> _forecastsHourly = [];
-  // create a new variable for _forecasts
+  // create a new variable for _forecasts todo 
+  List<forecast.Forecast> _filteredForecastHourly = [];
   forecast.Forecast? _activeForecast;
   location.Location? _location;
+  List<forecast.Forecast> _forecasts = [];
+
 
   @override
   void initState() {
@@ -82,13 +85,31 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // TODO: create a new function getForecasts that returns forecast.getForecastFromPoints
 
-  void setActiveHourlyForecast(int i){
+  Future<List<forecast.Forecast>> getForecasts(location.Location currentLocation) async {
+    return forecast.getForecastFromPoints(currentLocation.latitude, currentLocation.longitude);
+  }
+  
+  void setActiveForecast(int i){
     setState(() {
-      _activeForecast = _forecastsHourly[i];
+      _filteredForecastHourly = getFilteredForecasts(i);
+      _activeForecast = _forecasts[i];
     });
   }
 
-  // create a new function: setActiveHourlyForecast that updates _activeForecast with _forecasts[i]
+  // create a new function: setActiveForecast that updates _activeForecast with _forecasts[i]
+
+  void setActiveHourlyForecast(int i){
+    setState(() {
+      _activeForecast = _filteredForecastHourly[i];
+    });
+  }
+
+  List<forecast.Forecast> getFilteredForecasts(int i ) {
+   
+    return _forecastsHourly.where((f) => DateTime.parse(f.startTime!).day == DateTime.parse(_forecasts[i].startTime!).day).toList();
+
+
+  } 
 
 
   void setLocation() async {
@@ -96,11 +117,15 @@ class _MyHomePageState extends State<MyHomePage> {
       location.Location currentLocation = await location.getLocationFromGps();
 
       List<forecast.Forecast> currentHourlyForecasts = await getHourlyForecasts(currentLocation);
+      List<forecast.Forecast> currentForecasts = await getForecasts(currentLocation);
 
       setState(() {
         _location = currentLocation;
         _forecastsHourly = currentHourlyForecasts;
+        _forecasts = currentForecasts;
         _activeForecast = _forecastsHourly[10];
+        _filteredForecastHourly = getFilteredForecasts(0);
+       
         
       });
     }
@@ -132,7 +157,10 @@ class _MyHomePageState extends State<MyHomePage> {
               LocationWidget(location: _location),
               _activeForecast != null ? ForecastWidget(forecast: _activeForecast!) : Text(""),
               // TODO add a new ForecastSummariesWidget for the daily forecasts
-              _forecastsHourly.isNotEmpty ? ForecastSummariesWidget(forecasts: _forecastsHourly, setActiveForecast: setActiveHourlyForecast) : Text("")
+              _forecasts.isNotEmpty ? ForecastSummariesWidget(forecasts: _forecasts, setActiveForecast: setActiveForecast) : Text(""),
+              
+              _filteredForecastHourly.isNotEmpty ? ForecastSummariesWidget(forecasts: _filteredForecastHourly, setActiveForecast: setActiveHourlyForecast) : Text(""),
+              
             ],
           ),
         ),
@@ -140,9 +168,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-}
+
 
 // TODO: This will require some research
 // When a forecast is set from the daily forecasts (_forecasts), 
 // filter the hourly forecasts to only include forecasts with the same startDate (not including time) as the activeForecast
 
+
+}

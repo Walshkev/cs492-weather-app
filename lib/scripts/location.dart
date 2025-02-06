@@ -57,6 +57,21 @@ Future<Location> getLocationFromGps() async {
 
   
 } 
+Future<Location> getLocationPrompt(String city, String state, ) async {
+
+  geolocator.Position position = await determinePosition();
+
+  // use reverse geocoding to get a placemark from the latitude and longitude
+  List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(position.latitude, position.longitude);
+  String? state = placemarks[0].administrativeArea;
+  String? city = placemarks[0].locality;
+  String? zip = placemarks[0].postalCode;
+
+  // return a Location object with the complete location
+  return Location(city: city, state: state, zip: zip, latitude: position.latitude, longitude: position.longitude);
+
+  
+} 
 
 
 

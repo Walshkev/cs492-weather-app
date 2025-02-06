@@ -8,7 +8,6 @@ import 'package:weatherapp/widgets/forecast_summaries_widget.dart';
 import 'package:weatherapp/widgets/forecast_widget.dart';
 import 'package:weatherapp/widgets/location_widget.dart';
 
-
 void main() {
   runApp(const MyApp());
 }
@@ -66,9 +65,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   List<forecast.Forecast> _forecastsHourly = [];
-  List<forecast.Forecast> _filteredForecastsHourly= [];
+  List<forecast.Forecast> _filteredForecastsHourly = [];
   List<forecast.Forecast> _forecasts = [];
   List<forecast.Forecast> _dailyForecasts = [];
   forecast.Forecast? _activeForecast;
@@ -77,65 +75,72 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    setLocation();
-
+    setLocation(null);
   }
 
-  Future<List<forecast.Forecast>> getForecasts(location.Location currentLocation) async {
-    return forecast.getForecastFromPoints(currentLocation.latitude, currentLocation.longitude);
+  Future<List<forecast.Forecast>> getForecasts(
+      location.Location currentLocation) async {
+    return forecast.getForecastFromPoints(
+        currentLocation.latitude, currentLocation.longitude);
   }
 
-
-  Future<List<forecast.Forecast>> getHourlyForecasts(location.Location currentLocation) async {
-    return forecast.getForecastHourlyFromPoints(currentLocation.latitude, currentLocation.longitude);
+  Future<List<forecast.Forecast>> getHourlyForecasts(
+      location.Location currentLocation) async {
+    return forecast.getForecastHourlyFromPoints(
+        currentLocation.latitude, currentLocation.longitude);
   }
 
-  void setActiveForecast(int i){
+  void setActiveForecast(int i) {
     setState(() {
       _filteredForecastsHourly = getFilteredForecasts(i);
       _activeForecast = _dailyForecasts[i];
     });
   }
 
-  void setActiveHourlyForecast(int i){
+  void setActiveHourlyForecast(int i) {
     setState(() {
       _activeForecast = _filteredForecastsHourly[i];
     });
   }
 
-  void setDailyForecasts(){
+  void setDailyForecasts() {
     List<forecast.Forecast> dailyForecasts = [];
-    for (int i = 0; i < _forecasts.length-1; i+=2){
-      dailyForecasts.add(forecast.getForecastDaily(_forecasts[i], _forecasts[i+1]));
-      
+    for (int i = 0; i < _forecasts.length - 1; i += 2) {
+      dailyForecasts
+          .add(forecast.getForecastDaily(_forecasts[i], _forecasts[i + 1]));
     }
     setState(() {
       _dailyForecasts = dailyForecasts;
     });
   }
 
-  List<forecast.Forecast> getFilteredForecasts(int i){
-    return _forecastsHourly.where((f)=>time.equalDates(f.startTime, _dailyForecasts[i].startTime)).toList();
+  List<forecast.Forecast> getFilteredForecasts(int i) {
+    return _forecastsHourly
+        .where(
+            (f) => time.equalDates(f.startTime, _dailyForecasts[i].startTime))
+        .toList();
   }
 
-  void setLocation() async {
-    if (_location == null){
-      location.Location currentLocation = await location.getLocationFromGps();
-
-      List<forecast.Forecast> currentHourlyForecasts = await getHourlyForecasts(currentLocation);
-      List<forecast.Forecast> currentForecasts = await getForecasts(currentLocation);
-
-      setState(() {
-        _location = currentLocation;
-        _forecastsHourly = currentHourlyForecasts;
-        _forecasts = currentForecasts;
-        setDailyForecasts();
-        _filteredForecastsHourly = getFilteredForecasts(0);
-        _activeForecast = _forecastsHourly[0];
-        
-        
-      });
+  void setLocation([List<String>? locationList]) async {
+    location.Location currentLocation;
+    if (locationList == null){
+      currentLocation = await location.getLocationFromGps();
     }
+    else {
+      currentLocation = await location.getLocationFromAddress(locationList[0], locationList[1], locationList[2]) as location.Location;
+    }
+
+    List<forecast.Forecast> currentHourlyForecasts = await getHourlyForecasts(currentLocation);
+    List<forecast.Forecast> currentForecasts = await getForecasts(currentLocation);
+
+    setState(() {
+      _location = currentLocation;
+      _forecastsHourly = currentHourlyForecasts;
+      _forecasts = currentForecasts;
+      setDailyForecasts();
+      _filteredForecastsHourly = getFilteredForecasts(0);
+      _activeForecast = _forecastsHourly[0];
+    });
   }
 
   @override
@@ -151,30 +156,27 @@ class _MyHomePageState extends State<MyHomePage> {
       initialIndex: 0,
       child: Scaffold(
         appBar: AppBar(
-          // TRY THIS: Try changing the color here to a specific color (to
-          // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-          // change color while the other colors stay the same.
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(widget.title),
-          bottom: TabBar(
-            tabs: [
+            // TRY THIS: Try changing the color here to a specific color (to
+            // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
+            // change color while the other colors stay the same.
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            // Here we take the value from the MyHomePage object that was created by
+            // the App.build method, and use it to set our appbar title.
+            title: Text(widget.title),
+            bottom: TabBar(tabs: [
               Tab(icon: Icon(Icons.sunny_snowing)),
               Tab(icon: Icon(Icons.edit_location_alt))
-            ]
-          )
-        ),
-        body:TabBarView(
-          children: [ForecastTabWidget(
-            location: _location, 
-            activeForecast: _activeForecast,
-            dailyForecasts: _dailyForecasts,
-            filteredForecastsHourly: _filteredForecastsHourly,
-            setActiveForecast: setActiveForecast,
-            setActiveHourlyForecast: setActiveHourlyForecast),
-          LocationTabWidget()]
-        ),
+            ])),
+        body: TabBarView(children: [
+          ForecastTabWidget(
+              location: _location,
+              activeForecast: _activeForecast,
+              dailyForecasts: _dailyForecasts,
+              filteredForecastsHourly: _filteredForecastsHourly,
+              setActiveForecast: setActiveForecast,
+              setActiveHourlyForecast: setActiveHourlyForecast),
+          LocationTabWidget(setLocation: setLocation),
+        ]),
       ),
     );
   }
@@ -185,30 +187,84 @@ class _MyHomePageState extends State<MyHomePage> {
 class LocationTabWidget extends StatelessWidget {
   const LocationTabWidget({
     super.key,
+    required this.setLocation,
   });
+
+  final Function(List<String>) setLocation;
 
   @override
   Widget build(BuildContext context) {
-    return Text("PLACEHOLDER!!!!!");
+    final TextEditingController cityController = TextEditingController();
+    final TextEditingController stateController = TextEditingController();
+    final TextEditingController zipController = TextEditingController();
+    
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Column(
+          children: [
+            TextField(
+              controller: cityController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'City',
+              ),
+            ),
+            SizedBox(height: 8),
+            TextField(
+              controller: stateController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'State',
+              ),
+            ),
+            SizedBox(height: 8),
+            TextField(
+              controller: zipController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Zip',
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                String city = cityController.text;
+                String state = stateController.text;
+                String zip = zipController.text;
+                List<String> locationList = [city, state, zip];
+
+                setLocation(locationList);
+                
+             
+              },
+              child: Text('Submit'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
+
+    
+  
 }
 
 class ForecastTabWidget extends StatelessWidget {
-  const ForecastTabWidget({
-    super.key,
-    required location.Location? location,
-    required forecast.Forecast? activeForecast,
-    required List<forecast.Forecast> dailyForecasts,
-    required List<forecast.Forecast> filteredForecastsHourly,
-    required Function setActiveForecast,
-    required Function setActiveHourlyForecast
-
-  }) : _location = location, 
-      _activeForecast = activeForecast,
-      _dailyForecasts = dailyForecasts,
-      _filteredForecastsHourly = filteredForecastsHourly,
-      _setActiveForecast = setActiveForecast,
-      _setActiveHourlyForecast = setActiveHourlyForecast;
+  const ForecastTabWidget(
+      {super.key,
+      required location.Location? location,
+      required forecast.Forecast? activeForecast,
+      required List<forecast.Forecast> dailyForecasts,
+      required List<forecast.Forecast> filteredForecastsHourly,
+      required Function setActiveForecast,
+      required Function setActiveHourlyForecast})
+      : _location = location,
+        _activeForecast = activeForecast,
+        _dailyForecasts = dailyForecasts,
+        _filteredForecastsHourly = filteredForecastsHourly,
+        _setActiveForecast = setActiveForecast,
+        _setActiveHourlyForecast = setActiveHourlyForecast;
 
   final location.Location? _location;
   final forecast.Forecast? _activeForecast;
@@ -220,14 +276,24 @@ class ForecastTabWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Center(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
         child: Column(
           children: [
             LocationWidget(location: _location),
-            _activeForecast != null ? ForecastWidget(forecast: _activeForecast!) : Text(""),
-            _dailyForecasts.isNotEmpty ? ForecastSummariesWidget(forecasts: _dailyForecasts, setActiveForecast: _setActiveForecast) : Text(""),
-            _filteredForecastsHourly.isNotEmpty ? ForecastSummariesWidget(forecasts: _filteredForecastsHourly, setActiveForecast: _setActiveHourlyForecast) : Text("")
+            _activeForecast != null
+                ? ForecastWidget(forecast: _activeForecast!)
+                : Text(""),
+            _dailyForecasts.isNotEmpty
+                ? ForecastSummariesWidget(
+                    forecasts: _dailyForecasts,
+                    setActiveForecast: _setActiveForecast)
+                : Text(""),
+            _filteredForecastsHourly.isNotEmpty
+                ? ForecastSummariesWidget(
+                    forecasts: _filteredForecastsHourly,
+                    setActiveForecast: _setActiveHourlyForecast)
+                : Text("")
           ],
         ),
       ),

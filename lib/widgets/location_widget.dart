@@ -13,5 +13,6 @@ class LocationWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text("${_location?.city ?? "city"}, ${_location?.state ?? "state"} ${_location?.zip ?? "zip"}");
   }
+  
 }
 

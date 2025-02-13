@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:geolocator/geolocator.dart' as geolocator;
+import 'package:path_provider/path_provider.dart';
 
 class Location{
   final String? state;
@@ -16,6 +19,52 @@ class Location{
     required this.longitude
   });
 
+  Location.fromJson(Map<String, dynamic> json)
+    : state = json['state'] as String,
+      city = json['city'] as String,
+      zip = json['zip'] as String,
+      latitude = json['latitude'] as double,
+      longitude = json['longitude'] as double;
+  
+  Map<String, dynamic> toJson() => {
+    'state': state,
+    'city': city,
+    'zip': zip,
+    'latitude': latitude,
+    'longitude': longitude
+  };
+  Future<String> get _localPath async {
+  final directory = await getApplicationDocumentsDirectory();
+
+  return directory.path;
+}
+
+Future<File> get _localFile async {
+  final path = await _localPath;
+  return File('$path/counter.txt');
+}
+
+
+Future<File> writeCounter(int counter) async {
+  final file = await _localFile;
+
+  // Write the file
+  return file.writeAsString('$counter');
+}
+
+Future<int> readCounter() async {
+  try {
+    final file = await _localFile;
+
+    // Read the file
+    final contents = await file.readAsString();
+
+    return int.parse(contents);
+  } catch (e) {
+    // If encountering an error, return 0
+    return 0;
+  }
+}
 }
 
 Future<Location?> getLocationFromAddress(String rawCity, String rawState, String rawZip) async {

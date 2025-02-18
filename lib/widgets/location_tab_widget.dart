@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:weatherapp/scripts/location.dart' as location;
 import 'package:weatherapp/scripts/location_storage.dart' as locationStorage;
+import 'package:weatherapp/scripts/location_database.dart' as location_database;
+
+
+
 
 // TODO: Use the new location.database.dart logic to get the locations
 // update the addLocations function to only add a single location instead of the entire list of _saved locations
@@ -27,6 +31,8 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
 
   List<location.Location> _savedLocations = [];
 
+  late location_database.LocationDatabase _db ;
+
 
 
   void _setLocationFromAddress(String city, String state, String zip) async {
@@ -44,29 +50,42 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
     widget._setLocation(currentLocation);
   }
 
-  
   void _addLocation(location.Location location) async{
     setState(() {
       _savedLocations.add(location);
     });
 
-    await ls.writeLocations(_savedLocations);
+    _db.insertLocation(location);
     
   }
+
+
+  
+
 
   @override
   void initState() {
     // Get initial locations
     super.initState();
     _loadLocations();
+ 
   }
 
+  void _deleteLocation(location.Location location) async {
+    _db.deleteLocation(location);
+    _loadLocations();
+  }
   void _loadLocations() async {
-    List<location.Location> locations = await ls.readLocations();
+   _db = await location_database.LocationDatabase.open();
+    List<location.Location> locations = await _db.getLocations();
+
     setState(() {
       _savedLocations = locations;
     });
+   
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +94,14 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
         LocationDisplayWidget(activeLocation: widget._location),
         LoctionInputWidget(setLocation: _setLocationFromAddress), // pass in _addLocation
         ElevatedButton(onPressed: ()=>{_setLocationFromGps()},child: const Text("Get From GPS")),
-        SavedLocationsWidget(locations: _savedLocations, setLocation: widget._setLocation)
+        SavedLocationsWidget(locations: _savedLocations, setLocation: widget._setLocation),
+        
+        
+        ElevatedButton(onPressed: () {
+          if (widget._location != null) {
+        _deleteLocation(widget._location!);
+          }
+        }, child: const Text("Delete Current Location")),
       ],
     );
   }

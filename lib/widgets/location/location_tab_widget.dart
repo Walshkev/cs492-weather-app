@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:weatherapp/scripts/location.dart' as location;
-import 'package:weatherapp/scripts/location_storage.dart' as locationStorage;
-import 'package:weatherapp/scripts/location_database.dart' as location_database;
+import 'package:weatherapp/scripts/location/location.dart' as location;
+import 'package:weatherapp/scripts/location/location_storage.dart'
+    as location_storage;
+import 'package:weatherapp/scripts/location/location_database.dart'
+    as location_database;
+import 'package:weatherapp/widgets/location/saved_locations_widget.dart';
 
 class LocationTabWidget extends StatefulWidget {
   const LocationTabWidget(
@@ -19,7 +22,8 @@ class LocationTabWidget extends StatefulWidget {
 }
 
 class _LocationTabWidgetState extends State<LocationTabWidget> {
-  final locationStorage.LocationStorage ls = locationStorage.LocationStorage();
+  final location_storage.LocationStorage ls =
+      location_storage.LocationStorage();
 
   List<location.Location> _savedLocations = [];
 
@@ -27,42 +31,28 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
 
   var _editMode = false;
 
-  void _setLocationFromAddress(String city, String state, String zip) async {
-    // set location to null temporarily while it finds a new location
+// new
+  void _setLocation([String? city, String? state, String? zip]) async {
     widget._setLocation(null);
-    location.Location currentLocation = await location.getLocationFromAddress(
-        city, state, zip) as location.Location;
+    location.Location currentLocation =
+        (city == null && state == null && zip == null)
+            ? await location.getLocationFromGps()
+            : await location.getLocationFromAddress(
+                    city as String, state as String, zip as String)
+                as location.Location;
     widget._setLocation(currentLocation);
     _addLocation(currentLocation);
   }
-
-  void _setLocationFromGps() async {
-    // set location to null temporarily while it finds a new location
-    widget._setLocation(null);
-    location.Location currentLocation = await location.getLocationFromGps();
-    widget._setLocation(currentLocation);
-    _addLocation(currentLocation);
-  }
-
-  // previous json implementation
-  // void _addLocation(location.Location location) async{
-  //   setState(() {
-  //     _savedLocations.add(location);
-  //   });
-
-  //   await ls.writeLocations(_savedLocations);
-
-  // }
+// end new
 
   void _addLocation(location.Location location) async {
-    if (!_savedLocations.contains(location)){
+    if (!_savedLocations.contains(location)) {
       setState(() {
         _savedLocations.add(location);
       });
 
       _db.insertLocation(location);
     }
-
   }
 
   void _deleteLocation(location.Location location) async {
@@ -88,23 +78,14 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
     });
   }
 
-  // previous json implementation
-  // void _loadLocations() async {
-  //   List<location.Location> locations = await ls.readLocations();
-  //   setState(() {
-  //     _savedLocations = locations;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         LocationDisplayWidget(activeLocation: widget._location),
-        LoctionInputWidget(
-            setLocation: _setLocationFromAddress), // pass in _addLocation
+        LoctionInputWidget(setLocation: _setLocation), // pass in _addLocation
         ElevatedButton(
-            onPressed: () => {_setLocationFromGps()},
+            onPressed: () => {_setLocation()},
             child: const Text("Get From GPS")),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -125,35 +106,6 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
             editMode: _editMode,
             deleteLocation: _deleteLocation)
       ],
-    );
-  }
-}
-
-class SavedLocationsWidget extends StatelessWidget {
-  const SavedLocationsWidget(
-      {super.key,
-      required List<location.Location> locations,
-      required Function setLocation,
-      required Function deleteLocation,
-      required bool editMode})
-      : _locations = locations,
-        _setLocation = setLocation,
-        _deleteLocation = deleteLocation,
-        _editMode = editMode;
-
-  final List<location.Location> _locations;
-  final Function _setLocation;
-  final Function _deleteLocation;
-  final bool _editMode;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: _locations
-          .map((loc) => _editMode
-              ? SavedLocationEditWidget(loc: loc, delete: _deleteLocation)
-              : SavedLocationWidget(loc: loc, setLocation: _setLocation))
-          .toList(),
     );
   }
 }
@@ -192,9 +144,7 @@ class SavedLocationWidget extends StatelessWidget {
 
 class SavedLocationEditWidget extends StatelessWidget {
   const SavedLocationEditWidget(
-      {super.key,
-      required location.Location loc,
-      required Function delete})
+      {super.key, required location.Location loc, required Function delete})
       : _loc = loc,
         _delete = delete;
 
@@ -210,15 +160,19 @@ class SavedLocationEditWidget extends StatelessWidget {
           border: Border.all(color: Colors.red, width: 2)),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: SizedBox(width: 250, child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("${_loc.city}, ${_loc.state} ${_loc.zip}"),
-            GestureDetector(
-              onTap: (){_delete(_loc);}, 
-              child: Icon(Icons.delete, color: Colors.red))
-          ],
-        )),
+        child: SizedBox(
+            width: 250,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("${_loc.city}, ${_loc.state} ${_loc.zip}"),
+                GestureDetector(
+                    onTap: () {
+                      _delete(_loc);
+                    },
+                    child: Icon(Icons.delete, color: Colors.red))
+              ],
+            )),
       ),
     );
   }

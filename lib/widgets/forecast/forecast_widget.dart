@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:weatherapp/scripts/forecast.dart' as forecast;
-import 'package:weatherapp/scripts/time.dart' as time;
-import 'package:weatherapp/scripts/math.dart' as math;
+import 'package:weatherapp/scripts/forecast/forecast.dart' as forecast;
+import 'package:weatherapp/scripts/utilities/time.dart' as time;
+import 'package:weatherapp/scripts/utilities/math.dart' as math;
 import 'package:weatherapp/widgets/weather_icon_widget.dart';
 
 class ForecastWidget extends StatelessWidget {
@@ -20,13 +20,20 @@ class ForecastWidget extends StatelessWidget {
         child: Column(
           children: [
             ForecastNameWidget(forecast: _forecast),
-            WeatherIconWidget(iconPath: _forecast.getIconPath(), height: 100, width: 100),
+            WeatherIconWidget(
+                iconPath: _forecast.getIconPath(), height: 100, width: 100),
             Text(_forecast.shortForecast),
             Text("Wind: ${_forecast.windSpeed} ${_forecast.windDirection}"),
             Text("Temp: ${_forecast.temperature}°${_forecast.temperatureUnit}"),
-            Text(_forecast.dewpoint != null ? "Dewpoint: ${math.roundToDecimalPlaces(_forecast.dewpoint, 2)}" : ""),
-            Text(_forecast.humidity != null ? "Humidity: ${_forecast.humidity}" : ""),
-            Text(_forecast.precipitationProbability != null ? "Chance of Rain: ${_forecast.precipitationProbability}" : ""),
+            Text(_forecast.dewpoint != null
+                ? "Dewpoint: ${math.roundToDecimalPlaces(_forecast.dewpoint, 2)}"
+                : ""),
+            Text(_forecast.humidity != null
+                ? "Humidity: ${_forecast.humidity}"
+                : ""),
+            Text(_forecast.precipitationProbability != null
+                ? "Chance of Rain: ${_forecast.precipitationProbability}"
+                : ""),
             DetailedForecastWidget(forecast: _forecast)
           ],
         ),
@@ -63,8 +70,8 @@ class ForecastNameWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      _forecast.name ?? time.convertTimestampToDayAndHour(_forecast.startTime),
-      style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold)
-    );
+        _forecast.name ??
+            time.convertTimestampToDayAndHour(_forecast.startTime),
+        style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold));
   }
 }

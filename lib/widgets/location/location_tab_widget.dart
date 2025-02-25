@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:weatherapp/models/location.dart' as location;
 import 'package:provider/provider.dart';
+import 'package:weatherapp/providers/darkmode_povider.dart';
 import 'package:weatherapp/providers/location_provider.dart';
+
 
 class LocationTabWidget extends StatefulWidget {
   const LocationTabWidget({super.key});
@@ -41,7 +43,8 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
         SavedLocationsWidget(
           locationService: locationProvider,
           editMode: _editMode,
-        )
+        ),
+        ColorSchemeToggle(),
       ],
     );
   }
@@ -263,3 +266,31 @@ class _LocationTextWidgetState extends State<LocationTextWidget> {
     );
   }
 }
+class ColorSchemeToggle extends StatefulWidget {
+  const ColorSchemeToggle({super.key});
+
+  @override
+  State<ColorSchemeToggle> createState() => _ColorSchemeToggleState();
+}
+class _ColorSchemeToggleState extends State<ColorSchemeToggle> {
+  @override
+  Widget build(BuildContext context) {
+    var darkModeProvider = Provider.of<DarkModeProvider>(context);
+    bool isDarkMode = darkModeProvider.isDarkMode;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Dark Mode: "),
+        Switch(
+            value: isDarkMode,
+            onChanged: (bool value) {
+              setState(() {
+                darkModeProvider.toggleDarkMode();
+              });
+            }),
+      ],
+    );
+  }
+}
+           

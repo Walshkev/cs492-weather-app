@@ -4,6 +4,7 @@ import 'package:weatherapp/widgets/forecast/forecast_tab_widget.dart';
 import 'package:weatherapp/widgets/location/location_tab_widget.dart';
 import 'package:weatherapp/providers/location_provider.dart';
 import 'package:weatherapp/providers/forecast_provider.dart';
+import 'package:weatherapp/providers/darkmode_povider.dart';
 
 void main() {
   runApp(MultiProvider(providers: [
@@ -11,6 +12,7 @@ void main() {
     ChangeNotifierProvider(
         create: (context) => LocationProvider(
             Provider.of<ForecastProvider>(context, listen: false))),
+    ChangeNotifierProvider(create: (context) => DarkModeProvider()),
   ], child: const MyApp()));
 }
 
@@ -23,10 +25,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: title,
+      darkTheme: ThemeData.dark(),
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         useMaterial3: true,
       ),
+      themeMode: Provider.of<DarkModeProvider>(context).isDarkMode
+          ? ThemeMode.dark
+          : ThemeMode.light,
       home: MyHomePage(title: title),
     );
   }

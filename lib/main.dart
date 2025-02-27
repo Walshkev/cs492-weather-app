@@ -7,6 +7,8 @@ import 'package:weatherapp/providers/location_provider.dart';
 import 'package:weatherapp/providers/forecast_provider.dart';
 import 'package:weatherapp/themes/themes.dart' as themes;
 
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
 // TODOS: The TODOs are located in Assignment8-1 in canvas assignments
 void main() {
   runApp(MultiProvider(providers: [
@@ -58,9 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
         endDrawer: SettingsDrawer(settingsProvider: settingsProvider),
         appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            actions: [
-              SettingsButton()
-            ],
+            actions: [SettingsButton()],
             title: Text(widget.title),
             bottom: TabBar(tabs: [
               Tab(icon: Icon(Icons.sunny_snowing)),
@@ -81,11 +81,13 @@ class SettingsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
         icon: Icon(Icons.settings),
-        onPressed: () {Scaffold.of(context).openEndDrawer();});
+        onPressed: () {
+          Scaffold.of(context).openEndDrawer();
+        });
   }
 }
 
-class SettingsDrawer extends StatelessWidget {
+class SettingsDrawer extends StatefulWidget {
   const SettingsDrawer({
     super.key,
     required this.settingsProvider,
@@ -94,13 +96,47 @@ class SettingsDrawer extends StatelessWidget {
   final SettingsProvider settingsProvider;
 
   @override
+  _SettingsDrawerState createState() => _SettingsDrawerState();
+}
+
+class _SettingsDrawerState extends State<SettingsDrawer> {
+  Color pickerColor = Colors.yellow;
+
+  @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Switch(
-          value: settingsProvider.darkMode,
-          onChanged: (bool value) {
-            settingsProvider.toggleMode();
-          }),
+      child: ListView(
+        children: [
+          SwitchListTile(
+            title: Text('Dark Mode'),
+            value: widget.settingsProvider.darkMode,
+            onChanged: (bool value) {
+              setState(() {
+                widget.settingsProvider.toggleMode();
+              });
+            },
+          ),
+          Container(
+            padding: EdgeInsets.all(16.0),
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (Color color) {
+                setState(() {
+                  pickerColor = color;
+                });
+              },
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                widget.settingsProvider.setColor(pickerColor);
+              });
+            },
+            child: Text('Set Theme Color'),
+          ),
+        ],
+      ),
     );
   }
 }

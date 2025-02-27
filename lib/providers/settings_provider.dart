@@ -1,8 +1,11 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsProvider extends ChangeNotifier {
   bool _darkMode = false;
+  var _color = Colors.yellow ;
   SharedPreferences? prefs;
 
   bool get darkMode => _darkMode;
@@ -27,4 +30,15 @@ class SettingsProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void setColor(var color) async {
+    prefs = await SharedPreferences.getInstance();
+    _color = color;
+    prefs!.setString('color', color.toString());
+    notifyListeners();
+  }
+
+
+
+
 }
